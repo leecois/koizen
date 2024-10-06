@@ -1,0 +1,79 @@
+{
+  "expo": {
+    "name": "koizen",
+    "slug": "koizen",
+    "scheme": "koizen",
+    "owner": "leecois",
+    "privacy": "unlisted",
+    "version": "1.0.1",
+    "platforms": ["ios", "android", "web"],
+    "orientation": "portrait",
+    "icon": "./assets/images/logo-lg.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "permissions": ["com.google.android.gms.permission.AD_ID"],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo-sm.png",
+        "backgroundColor": "#ffffff"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "dineineasy.com",
+              "pathPrefix": "/welcome"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/logo-sm.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ede85232-741c-4953-b21d-a5b8f11fab33"
+      }
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ede85232-741c-4953-b21d-a5b8f11fab33"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font",
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-dev-launcher",
+        {
+          "launchMode": "most-recent"
+        }
+      ]
+    ]
+  }
+}
