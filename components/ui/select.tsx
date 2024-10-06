@@ -1,3 +1,4 @@
+/* eslint-disable import/namespace */
 import * as SelectPrimitive from '@rn-primitives/select';
 import * as React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
@@ -27,10 +28,16 @@ const SelectTrigger = React.forwardRef<
       className,
     )}
     {...props}>
-    <>{children}</>
+    {typeof children === 'function'
+      ? children({
+          pressed: false,
+        })
+      : children}{' '}
+    {/* Ensure children is ReactNode */}
     <ChevronDown size={16} aria-hidden className="text-foreground opacity-50" />
   </SelectPrimitive.Trigger>
 ));
+
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 /**

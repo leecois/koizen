@@ -2,9 +2,9 @@ name: CI - APP Preview
 
 on:
   pull_request:
-    branches: ["*"]
+    branches: ['*']
   push:
-    branches: ["dev", "staging", "main", "release/**"]
+    branches: ['dev', 'staging', 'main', 'release/**']
 
 jobs:
   update:
