@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/config/supabase';
 import { H1, H2, Muted } from '@/components/ui/typography';
 import { Text } from '@/components/ui/text';
@@ -32,6 +32,12 @@ type KoiFish = {
   notes: string;
   created_at: string;
   updated_at: string;
+  status: 'alive' | 'deceased';
+};
+
+type Pond = {
+  id: string;
+  name: string;
 };
 
 type GrowthRecord = {
@@ -55,7 +61,9 @@ type FeedingRecord = {
 
 const KoiDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const [koi, setKoi] = useState<KoiFish | null>(null);
+  const [pond, setPond] = useState<Pond | null>(null);
   const [growthRecords, setGrowthRecords] = useState<GrowthRecord[]>([]);
   const [feedingRecords, setFeedingRecords] = useState<FeedingRecord[]>([]);
   const [expandedGrowth, setExpandedGrowth] = useState(false);
@@ -74,6 +82,12 @@ const KoiDetailScreen = () => {
     fetchFeedingRecords();
   }, [id]);
 
+  useEffect(() => {
+    if (koi?.pond_id) {
+      fetchPondDetails(koi.pond_id);
+    }
+  }, [koi]);
+
   const fetchKoiDetails = async () => {
     const { data, error } = await supabase.from('koi_fish').select('*').eq('id', id).single();
 
@@ -81,6 +95,16 @@ const KoiDetailScreen = () => {
       console.error('Error fetching koi details:', error);
     } else if (data) {
       setKoi(data);
+    }
+  };
+
+  const fetchPondDetails = async (pondId: string) => {
+    const { data, error } = await supabase.from('ponds').select('*').eq('id', pondId).single();
+
+    if (error) {
+      console.error('Error fetching pond details:', error);
+    } else if (data) {
+      setPond(data);
     }
   };
 
@@ -121,11 +145,6 @@ const KoiDetailScreen = () => {
     setIsFeedingRecordBottomSheetOpen(false);
   };
 
-  const handleAddFeedingRecord = async () => {
-    setSelectedFeedingRecord(null);
-    setIsFeedingRecordBottomSheetOpen(true);
-  };
-
   const handleKoiUpdated = () => {
     fetchKoiDetails();
     setIsBottomSheetOpen(false);
@@ -143,10 +162,38 @@ const KoiDetailScreen = () => {
     setIsFeedingRecordBottomSheetOpen(true);
   };
 
+  const handleDeleteKoi = async () => {
+    if (!koi) return;
+
+    const { error } = await supabase.from('koi_fish').delete().eq('id', koi.id);
+
+    if (error) {
+      console.error('Lỗi khi xóa cá koi:', error);
+      Alert.alert('Lỗi', 'Có lỗi xảy ra khi xóa cá koi.');
+    } else {
+      Alert.alert('Thành công', 'Đã xóa cá koi thành công.');
+      router.push('/(app)/(home)');
+    }
+  };
+
+  const handleUpdateKoiStatus = async (status: 'alive' | 'deceased') => {
+    if (!koi) return;
+
+    const { error } = await supabase.from('koi_fish').update({ status }).eq('id', koi.id);
+
+    if (error) {
+      console.error(`Lỗi khi cập nhật trạng thái cá koi thành ${status}:`, error);
+      Alert.alert('Lỗi', `Có lỗi xảy ra khi cập nhật trạng thái cá koi thành ${status}.`);
+    } else {
+      fetchKoiDetails();
+      Alert.alert('Thành công', `Trạng thái cá koi đã được cập nhật thành ${status}.`);
+    }
+  };
+
   if (!koi)
     return (
       <View className="flex-1 justify-center items-center">
-        <Muted>Loading your koi...</Muted>
+        <Muted>Đang tải cá koi của bạn...</Muted>
       </View>
     );
 
@@ -174,54 +221,51 @@ const KoiDetailScreen = () => {
         <Image source={{ uri: koi.image_url }} style={styles.image} />
         <View style={styles.content}>
           <H1 style={styles.name}>{koi.name}</H1>
+          {pond && <Text style={styles.pondName}>Hồ cá hiện tại: {pond.name}</Text>}
           <Card containerStyle={styles.card}>
             <H2 style={styles.sectionTitle}>Basic Information</H2>
             <View style={styles.infoRow}>
-              <InfoItem icon="fish" label="Variety" value={koi.variety} />
-              <InfoItem icon="dumbbell" label="Physique" value={koi.physique} />
+              <InfoItem icon="fish" label="Giống" value={koi.variety} />
+              <InfoItem icon="dumbbell" label="Thể trạng" value={koi.physique} />
             </View>
             <View style={styles.infoRow}>
-              <InfoItem icon="birthday-cake" label="Age" value={`${koi.age} years`} />
-              <InfoItem icon="venus-mars" label="Sex" value={koi.sex} />
-            </View>
-          </Card>
-
-          <Card containerStyle={styles.card}>
-            <H2 style={styles.sectionTitle}>Physical Characteristics</H2>
-            <View style={styles.infoRow}>
-              <InfoItem icon="ruler-vertical" label="Size" value={`${koi.size} cm`} />
-              <InfoItem icon="weight" label="Weight" value={`${koi.weight} kg`} />
+              <InfoItem icon="birthday-cake" label="Tuổi" value={`${koi.age} năm`} />
+              <InfoItem icon="venus-mars" label="Giới tính" value={koi.sex} />
             </View>
           </Card>
 
           <Card containerStyle={styles.card}>
-            <H2 style={styles.sectionTitle}>Origin & Purchase</H2>
+            <H2 style={styles.sectionTitle}>Đặt điểm vật lý</H2>
             <View style={styles.infoRow}>
-              <InfoItem icon="map-marker-alt" label="Origin" value={koi.origin} />
-              <InfoItem icon="user" label="Breeder" value={koi.breeder} />
+              <InfoItem icon="ruler-vertical" label="Kích thước" value={`${koi.size} cm`} />
+              <InfoItem icon="weight" label="Cân nặng" value={`${koi.weight} kg`} />
+            </View>
+          </Card>
+
+          <Card containerStyle={styles.card}>
+            <H2 style={styles.sectionTitle}>Thông tin bổ sung</H2>
+            <View style={styles.infoRow}>
+              <InfoItem icon="map-marker-alt" label="Nguồn gốc" value={koi.origin} />
+              <InfoItem icon="user" label="Người nhân giống" value={koi.breeder} />
             </View>
             <View style={styles.infoRow}>
-              <InfoItem
-                icon="dollar-sign"
-                label="Purchase Price"
-                value={`$${koi.purchase_price}`}
-              />
+              <InfoItem icon="dollar-sign" label="Giá mua" value={`$${koi.purchase_price}`} />
               <InfoItem
                 icon="calendar-alt"
-                label="Purchase Date"
+                label="Ngày mua"
                 value={new Date(koi.purchase_date).toLocaleDateString()}
               />
             </View>
             <InfoItem
               icon="water"
-              label="In Pond Since"
+              label="Đã ở trong ao từ"
               value={new Date(koi.inpond_since).toLocaleDateString()}
             />
           </Card>
 
           {koi.notes && (
             <Card containerStyle={styles.card}>
-              <H2 style={styles.sectionTitle}>Notes</H2>
+              <H2 style={styles.sectionTitle}>Ghi chú</H2>
               <Text>{koi.notes}</Text>
             </Card>
           )}
@@ -231,19 +275,23 @@ const KoiDetailScreen = () => {
               <>
                 <FontAwesome5 name="chart-line" size={20} />
                 <ListItem.Content>
-                  <ListItem.Title>Growth Records</ListItem.Title>
+                  <ListItem.Title>Hồ sơ tăng trưởng</ListItem.Title>
                 </ListItem.Content>
               </>
             }
             isExpanded={expandedGrowth}
             onPress={() => setExpandedGrowth(!expandedGrowth)}>
-            {growthRecords.map(record => (
-              <GrowthRecordCard
-                key={record.id}
-                record={record}
-                onPress={() => handleSelectGrowthRecord(record)}
-              />
-            ))}
+            {growthRecords.length === 0 ? (
+              <Muted>Không có hồ sơ tăng trưởng nào.</Muted>
+            ) : (
+              growthRecords.map(record => (
+                <GrowthRecordCard
+                  key={record.id}
+                  record={record}
+                  onPress={() => handleSelectGrowthRecord(record)}
+                />
+              ))
+            )}
           </ListItem.Accordion>
 
           <ListItem.Accordion
@@ -251,25 +299,29 @@ const KoiDetailScreen = () => {
               <>
                 <FontAwesome5 name="utensils" size={20} />
                 <ListItem.Content>
-                  <ListItem.Title>Feeding Records</ListItem.Title>
+                  <ListItem.Title>Hồ sơ cho ăn</ListItem.Title>
                 </ListItem.Content>
               </>
             }
             isExpanded={expandedFeeding}
             onPress={() => setExpandedFeeding(!expandedFeeding)}>
-            {feedingRecords.map(record => (
-              <FeedingRecordCard
-                key={record.id}
-                record={record}
-                onPress={() => handleSelectFeedingRecord(record)}
-              />
-            ))}
+            {feedingRecords.length === 0 ? (
+              <Muted>Không có hồ sơ cho ăn nào.</Muted>
+            ) : (
+              feedingRecords.map(record => (
+                <FeedingRecordCard
+                  key={record.id}
+                  record={record}
+                  onPress={() => handleSelectFeedingRecord(record)}
+                />
+              ))
+            )}
           </ListItem.Accordion>
 
           <Muted style={styles.timestamps}>
-            Created: {new Date(koi.created_at).toLocaleString()}
+            Thời gian tạo: {new Date(koi.created_at).toLocaleString()}
             {'\n'}
-            Last Updated: {new Date(koi.updated_at).toLocaleString()}
+            Lần cuối cập nhật: {new Date(koi.updated_at).toLocaleString()}
           </Muted>
         </View>
       </ScrollView>
@@ -280,10 +332,76 @@ const KoiDetailScreen = () => {
         onOpen={() => setIsSpeedDialOpen(true)}
         onClose={() => setIsSpeedDialOpen(false)}
         color="#b30400">
+        {koi.status === 'alive' ? (
+          <SpeedDial.Action
+            key="deceased-koi"
+            icon={{ name: 'outlet', color: 'red' }}
+            title="Đánh dấu là đã chết"
+            color="white"
+            onPress={() => {
+              Alert.alert(
+                'Đánh dấu cá koi đã chết',
+                'Bạn có chắc chắn muốn đánh dấu cá koi này là đã chết?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Mark as Deceased',
+                    style: 'destructive',
+                    onPress: () => handleUpdateKoiStatus('deceased'),
+                  },
+                ],
+                { cancelable: true },
+              );
+              setIsSpeedDialOpen(false);
+            }}
+          />
+        ) : (
+          <SpeedDial.Action
+            key="revive-koi"
+            icon={{ name: 'favorite', color: '#fff' }}
+            title="Đánh dấu là sống"
+            color="green"
+            onPress={() => {
+              Alert.alert(
+                'Cá Koi Sống Lại',
+                'Bạn có chắc chắn muốn đánh dấu cá koi này là sống lại?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Revive',
+                    style: 'default',
+                    onPress: () => handleUpdateKoiStatus('alive'),
+                  },
+                ],
+                { cancelable: true },
+              );
+              setIsSpeedDialOpen(false);
+            }}
+          />
+        )}
+        <SpeedDial.Action
+          key="delete-koi"
+          icon={{ name: 'delete', color: '#fff' }}
+          title="Xóa cá koi"
+          color="#b30400"
+          onPress={() => {
+            Alert.alert(
+              'Xóa cá koi',
+              'Bạn có chắc chắn muốn xóa cá koi này? Hành động này không thể hoàn tác.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: handleDeleteKoi },
+              ],
+              { cancelable: true },
+            );
+            setIsSpeedDialOpen(false);
+          }}
+        />
         <SpeedDial.Action
           key="update-koi"
           icon={{ name: 'edit', color: '#fff' }}
-          title="Update Koi"
+          title="Cập nhật cá Koi"
+          color="blue"
           onPress={() => {
             setSelectedKoi(koi);
             setIsSpeedDialOpen(false);
@@ -293,10 +411,10 @@ const KoiDetailScreen = () => {
         <SpeedDial.Action
           key="add-growth"
           icon={{ name: 'add', color: '#fff' }}
-          title="Add Growth Record"
+          title="Thêm hồ sơ tăng trưởng"
           onPress={() => {
-            setSelectedKoi(koi); // Ensure selectedKoi is set
-            setSelectedGrowthRecord(null); // Clear selected growth record
+            setSelectedKoi(koi);
+            setSelectedGrowthRecord(null);
             setIsSpeedDialOpen(false);
             setIsGrowthRecordBottomSheetOpen(true);
           }}
@@ -304,10 +422,10 @@ const KoiDetailScreen = () => {
         <SpeedDial.Action
           key="add-feeding"
           icon={{ name: 'add', color: '#fff' }}
-          title="Add Feeding Record"
+          title="Thêm hồ sơ cho ăn"
           onPress={() => {
             setSelectedKoi(koi);
-            setSelectedFeedingRecord(null); // Clear selected feeding record
+            setSelectedFeedingRecord(null);
             setIsSpeedDialOpen(false);
             setIsFeedingRecordBottomSheetOpen(true);
           }}
@@ -354,6 +472,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 16,
   },
+  pondName: {
+    textAlign: 'center',
+    marginBottom: 16,
+    fontSize: 16,
+    color: '#666',
+  },
   card: {
     borderRadius: 8,
     marginBottom: 16,
@@ -397,5 +521,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 });
-
 export default KoiDetailScreen;

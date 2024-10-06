@@ -44,13 +44,13 @@ export default function MaterialTopTabsLayout() {
       <MaterialTopTabs.Screen
         name="pond"
         options={{
-          title: 'My Pond',
+          title: 'Hồ Cá',
         }}
       />
       <MaterialTopTabs.Screen
         name="water-parameters"
         options={{
-          title: 'Water Parameters',
+          title: 'Tham Số Nước',
         }}
       />
     </MaterialTopTabs>

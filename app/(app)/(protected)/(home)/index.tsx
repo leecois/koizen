@@ -15,6 +15,7 @@ type KoiFish = {
   image_url: string;
   sex: string;
   size: number;
+  status: string;
 };
 
 export default function MyKoiScreen() {
@@ -63,7 +64,7 @@ export default function MyKoiScreen() {
     <View className="flex-1 bg-gray-100">
       {isLoading && !isRefreshing ? (
         <View className="flex-1 justify-center items-center">
-          <Muted>Loading your koi...</Muted>
+          <Muted>Đang tải cá koi của bạn...</Muted>
         </View>
       ) : (
         <FlatList
@@ -85,7 +86,7 @@ export default function MyKoiScreen() {
           <SpeedDial.Action
             key="add-koi"
             icon={{ name: 'add', color: '#fff' }}
-            title="Add New Koi"
+            title="Thêm Cá Koi Mới"
             onPress={() => {
               setIsSpeedDialOpen(false);
               setIsBottomSheetOpen(true);

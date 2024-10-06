@@ -105,8 +105,7 @@ export default function WaterParameters() {
   const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
   return (
     <View className="flex-1">
-      <ScrollView style={styles.container}>
-        <H1 style={styles.title}>Water Parameters</H1>
+      <ScrollView style={styles.container}>  
         {mockWaterParameterSets.map(set => (
           <WaterParameterCard key={set.id} set={set} />
         ))}

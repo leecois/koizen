@@ -58,7 +58,7 @@ const RenderKoiItem = ({ item }: { item: KoiFish }) => (
                 <View className="flex-row items-center">
                   <FontAwesome5 name="fish" size={14} color="#3498db" style={{ width: 20 }} />
                   <View>
-                    <Muted className="text-xs">Variety</Muted>
+                    <Muted className="text-xs">Giống</Muted>
                     <H4 className="text-sm">{item.variety}</H4>
                   </View>
                 </View>
@@ -72,7 +72,7 @@ const RenderKoiItem = ({ item }: { item: KoiFish }) => (
                     style={{ width: 20 }}
                   />
                   <View>
-                    <Muted className="text-xs">Age</Muted>
+                    <Muted className="text-xs">Tuổi</Muted>
                     <H4 className="text-sm">{item.age} years</H4>
                   </View>
                 </View>
@@ -88,7 +88,7 @@ const RenderKoiItem = ({ item }: { item: KoiFish }) => (
                     style={{ width: 20 }}
                   />
                   <View>
-                    <Muted className="text-xs">Length</Muted>
+                    <Muted className="text-xs">Chiều dài</Muted>
                     <H4 className="text-sm">{item.size} cm</H4>
                   </View>
                 </View>
@@ -97,7 +97,7 @@ const RenderKoiItem = ({ item }: { item: KoiFish }) => (
                 <View className="flex-row items-center">
                   <FontAwesome5 name="weight" size={14} color="#f39c12" style={{ width: 20 }} />
                   <View>
-                    <Muted className="text-xs">Weight</Muted>
+                    <Muted className="text-xs">Cân nặng</Muted>
                     <H4 className="text-sm">{item.weight} kg</H4>
                   </View>
                 </View>
