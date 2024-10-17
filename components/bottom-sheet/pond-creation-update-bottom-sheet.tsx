@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Image, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Divider, Input } from '@rneui/themed';
 import { useSupabase } from '@/context/supabase-provider';
 
-type PondData = {
+const DEFAULT_IMAGE_URL = 'https://picsum.photos/600/400';
+
+export type PondData = {
+  id?: string;
   user_id: string;
   name: string;
   image_url: string;
@@ -17,27 +20,30 @@ type PondData = {
   depth: number;
   volume: number;
   drain_count: number;
+  fish_count?: number;
   pump_capacity: number;
   created_at: Date;
 };
 
-type PondCreationBottomSheetProps = {
+type PondCreationUpdateBottomSheetProps = {
   isOpen: boolean;
   onClose: () => void;
-  onPondCreated: () => void;
+  onPondCreatedOrUpdated: () => void;
+  pondToUpdate?: PondData | null;
 };
 
-const PondCreationBottomSheet = ({
+const PondCreationUpdateBottomSheet = ({
   isOpen,
   onClose,
-  onPondCreated,
-}: PondCreationBottomSheetProps) => {
+  onPondCreatedOrUpdated,
+  pondToUpdate,
+}: PondCreationUpdateBottomSheetProps) => {
   const { user } = useSupabase();
 
   const initialPondData: PondData = {
-    user_id: user?.id || '',
+    user_id: user?.id ?? '',
     name: '',
-    image_url: '',
+    image_url: DEFAULT_IMAGE_URL,
     size: 0,
     depth: 0,
     volume: 0,
@@ -48,6 +54,31 @@ const PondCreationBottomSheet = ({
 
   const [pondData, setPondData] = useState<PondData>(initialPondData);
   const [uploading, setUploading] = useState(false);
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setIsUserLoaded(true);
+      setPondData(prevData => ({
+        ...prevData,
+        user_id: user.id,
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (pondToUpdate) {
+      setPondData({
+        ...pondToUpdate,
+        created_at: new Date(pondToUpdate.created_at),
+      });
+    } else if (user) {
+      setPondData({
+        ...initialPondData,
+        user_id: user.id,
+      });
+    }
+  }, [pondToUpdate, isOpen, user]);
 
   const handleInputChange = (key: keyof PondData, value: string | number | Date) => {
     setPondData(prev => ({ ...prev, [key]: value }));
@@ -107,27 +138,50 @@ const PondCreationBottomSheet = ({
       return;
     }
 
-    const { data, error } = await supabase.from('ponds').insert(pondData).select();
+    const dataToSubmit = {
+      ...pondData,
+      user_id: user?.id,
+      image_url: pondData.image_url || DEFAULT_IMAGE_URL,
+    };
+
+    let result;
+    if (pondToUpdate) {
+      // Update existing pond
+      result = await supabase.from('ponds').update(dataToSubmit).eq('id', pondToUpdate.id).select();
+    } else {
+      // Create new pond
+      result = await supabase.from('ponds').insert(dataToSubmit).select();
+    }
+
+    const { data, error } = result;
 
     if (error) {
-      console.error('Error creating pond:', error);
-      Alert.alert('Error', 'There was an error creating the pond.');
+      console.error('Error creating/updating pond:', error);
+      Alert.alert('Error', 'There was an error creating/updating the pond.');
     } else if (data) {
-      onPondCreated();
+      onPondCreatedOrUpdated();
       onClose();
     }
   };
 
   const resetForm = () => {
-    setPondData(initialPondData);
+    setPondData(
+      pondToUpdate
+        ? { ...pondToUpdate, created_at: new Date(pondToUpdate.created_at) }
+        : initialPondData,
+    );
   };
+
+  if (!isUserLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={{ padding: 16 }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' }}>
-            Add New Pond
+            {pondToUpdate ? 'Update Pond' : 'Add New Pond'}
           </Text>
 
           <TouchableOpacity
@@ -136,7 +190,7 @@ const PondCreationBottomSheet = ({
             disabled={uploading}>
             {pondData.image_url ? (
               <Image
-                source={{ uri: pondData.image_url }}
+                source={{ uri: pondData.image_url || DEFAULT_IMAGE_URL }}
                 style={{ width: '100%', height: 200, borderRadius: 8 }}
               />
             ) : (
@@ -225,7 +279,9 @@ const PondCreationBottomSheet = ({
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
             <Button onPress={handleSubmit} disabled={uploading} style={{ flex: 1, marginRight: 8 }}>
-              <Text style={{ color: 'white', fontWeight: 'bold' }}>Create Pond</Text>
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                {pondToUpdate ? 'Update Pond' : 'Create Pond'}
+              </Text>
             </Button>
             <Button onPress={resetForm} variant="outline" style={{ flex: 1, marginLeft: 8 }}>
               <Text style={{ fontWeight: 'bold' }}>Reset</Text>
@@ -237,4 +293,4 @@ const PondCreationBottomSheet = ({
   );
 };
 
-export default PondCreationBottomSheet;
+export default PondCreationUpdateBottomSheet;

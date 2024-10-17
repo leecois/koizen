@@ -110,7 +110,7 @@ const MeasurementCreation = ({
   const fetchPonds = async () => {
     const { data, error } = await supabase.from('ponds').select('id, name').order('name');
     if (error) {
-      console.error('Error fetching ponds:', error);
+      console.error('Lỗi khi lấy dữ liệu ao:', error);
     } else {
       setPonds(data || []);
     }
@@ -135,7 +135,7 @@ const MeasurementCreation = ({
 
   const handleSubmit = async () => {
     if (!waterData.pond_id) {
-      Alert.alert('Validation Error', 'Please select a pond.');
+      Alert.alert('Lỗi xác thực', 'Vui lòng chọn một ao.');
       return;
     }
 
@@ -148,14 +148,14 @@ const MeasurementCreation = ({
       return acc;
     }, {} as any);
 
-    console.log('Creating water parameter:', numericWaterData);
+    console.log('Tạo thông số nước:', numericWaterData);
     // Uncomment the following lines when ready to submit to Supabase
     const { data, error } = await supabase
       .from('water_parameters')
       .insert(numericWaterData)
       .select();
     if (error) {
-      console.error('Error creating water parameter:', error);
+      console.error('Lỗi khi tạo thông số nước:', error);
     } else if (data) {
       onMeasurementCreated();
       onClose();
@@ -172,7 +172,7 @@ const MeasurementCreation = ({
 
   const isValueInRange = (key: keyof typeof optimalRanges, value: string) => {
     const range = optimalRanges[key];
-    if (!range) return true; // If no range is defined, consider it valid
+    if (!range) return true; // Nếu không có phạm vi được định nghĩa, coi như hợp lệ
     const numericValue = parseFloat(value);
     return numericValue >= range.min && numericValue <= range.max;
   };
@@ -220,14 +220,14 @@ const MeasurementCreation = ({
     <BottomSheet isOpen={isOpen} onClose={onClose}>
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View className="p-4">
-          <Text className="text-2xl font-bold mb-4 text-center">Add New Water Parameter</Text>
+          <Text className="text-2xl font-bold mb-4 text-center">Thêm Thông Số Nước Mới</Text>
 
           <View className="mb-4">
-            <Muted>Pond</Muted>
+            <Muted>Ao</Muted>
             <Picker
               selectedValue={waterData.pond_id}
               onValueChange={value => handleInputChange('pond_id', value)}>
-              <Picker.Item label="Select a pond" value="" />
+              <Picker.Item label="Chọn một ao" value="" />
               {ponds.map(pond => (
                 <Picker.Item key={pond.id} label={pond.name} value={pond.id} />
               ))}
@@ -235,7 +235,7 @@ const MeasurementCreation = ({
           </View>
 
           <View className="mb-4">
-            <Muted>Date and Time</Muted>
+            <Muted>Ngày và Giờ</Muted>
             <TouchableOpacity
               className="flex-row items-center justify-between p-3 border border-gray-300 rounded-lg"
               onPress={showDatePicker}>
@@ -253,47 +253,57 @@ const MeasurementCreation = ({
 
           <Divider className="my-4" />
           <View className="flex-row justify-between mb-4">
-            {renderInput('Nitrite (NO2)', 'nitrite_no2', 'mg/l', 'Optimal range: 0-0.1 mg/l')}
-            {renderInput('Nitrate (NO3)', 'nitrate_no3', 'mg/l', 'Optimal range: 0-20 mg/l')}
-          </View>
-          <View className="flex-row justify-between mb-4">
-            {renderInput('Phosphate (PO4)', 'phosphate_po4', 'mg/l', 'Optimal range: 0-0.035 mg/l')}
-            {renderInput('Ammonium (NH4)', 'ammonium_nh4', 'mg/l', 'Optimal range: 0-0.1 mg/l')}
-          </View>
-          <View className="flex-row justify-between mb-4">
-            {renderInput('Hardness: (GH)', 'hardness', '°dH', 'Optimal range: 0 - 21 °dH')}
-            {renderInput('Salt', 'salt', '%', 'Optimal range: 0-0.1%')}
-          </View>
-          <View className="flex-row justify-between mb-4">
-            {renderInput('Outdoor Temp', 'outdoor_temp', '°C', 'Optimal range: -40 - 40 °C')}
-            {renderInput('Oxygen (O2)', 'oxygen_o2', 'mg/l', 'Optimal range: > 6.5 mg/l')}
-          </View>
-          <View className="flex-row justify-between mb-4">
-            {renderInput('Temperature', 'temperature', '°C', 'Optimal range: 5 - 26 °C')}
-            {renderInput('pH-Value', 'ph_value', '', 'Optimal range: 6.9 - 8')}
-          </View>
-          <View className="flex-row justify-between mb-4">
-            {renderInput('Carbon. hardn. (KH)', 'kh', '°dH', 'Optimal range: >= 4 °dH')}
-            {renderInput('CO2', 'co2', 'mg/l', 'Optimal range: 5-35 mg/l')}
+            {renderInput('Nitrite (NO2)', 'nitrite_no2', 'mg/l', 'Phạm vi tối ưu: 0-0.1 mg/l')}
+            {renderInput('Nitrate (NO3)', 'nitrate_no3', 'mg/l', 'Phạm vi tối ưu: 0-20 mg/l')}
           </View>
           <View className="flex-row justify-between mb-4">
             {renderInput(
-              'Total Chlorines (mg/l)',
+              'Phosphate (PO4)',
+              'phosphate_po4',
+              'mg/l',
+              'Phạm vi tối ưu: 0-0.035 mg/l',
+            )}
+            {renderInput('Ammonium (NH4)', 'ammonium_nh4', 'mg/l', 'Phạm vi tối ưu: 0-0.1 mg/l')}
+          </View>
+          <View className="flex-row justify-between mb-4">
+            {renderInput('Độ cứng: (GH)', 'hardness', '°dH', 'Phạm vi tối ưu: 0 - 21 °dH')}
+            {renderInput('Muối', 'salt', '%', 'Phạm vi tối ưu: 0-0.1%')}
+          </View>
+          <View className="flex-row justify-between mb-4">
+            {renderInput(
+              'Nhiệt độ ngoài trời',
+              'outdoor_temp',
+              '°C',
+              'Phạm vi tối ưu: -40 - 40 °C',
+            )}
+            {renderInput('Oxy (O2)', 'oxygen_o2', 'mg/l', 'Phạm vi tối ưu: > 6.5 mg/l')}
+          </View>
+          <View className="flex-row justify-between mb-4">
+            {renderInput('Nhiệt độ', 'temperature', '°C', 'Phạm vi tối ưu: 5 - 26 °C')}
+            {renderInput('Giá trị pH', 'ph_value', '', 'Phạm vi tối ưu: 6.9 - 8')}
+          </View>
+          <View className="flex-row justify-between mb-4">
+            {renderInput('Độ cứng cacbonat (KH)', 'kh', '°dH', 'Phạm vi tối ưu: >= 4 °dH')}
+            {renderInput('CO2', 'co2', 'mg/l', 'Phạm vi tối ưu: 5-35 mg/l')}
+          </View>
+          <View className="flex-row justify-between mb-4">
+            {renderInput(
+              'Tổng Clo (mg/l)',
               'total_chlorines',
               'mg/l',
-              'Optimal range: 0 - 0.001 mg/l',
+              'Phạm vi tối ưu: 0 - 0.001 mg/l',
             )}
             {renderInput(
-              'Amount Fed',
+              'Lượng thức ăn',
               'amount_fed',
               'g',
-              'Tracking the amount of food fed allows you to monitor the health of your fish.',
+              'Theo dõi lượng thức ăn giúp bạn giám sát sức khỏe của cá.',
             )}
           </View>
 
-          {renderLabelWithInfo('Note', 'note', 'Additional notes')}
+          {renderLabelWithInfo('Ghi chú', 'note', 'Ghi chú thêm')}
           <Input
-            placeholder="Note"
+            placeholder="Ghi chú"
             value={waterData.note}
             onChangeText={value => handleInputChange('note', value)}
             multiline
@@ -303,10 +313,10 @@ const MeasurementCreation = ({
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
             <Button onPress={handleSubmit} style={{ flex: 1, marginRight: 8 }}>
-              <Text className="text-white font-bold">Create Water Parameter</Text>
+              <Text className="text-white font-bold">Tạo Thông Số Nước</Text>
             </Button>
             <Button onPress={resetForm} variant="outline" style={{ flex: 1, marginLeft: 8 }}>
-              <Text className="font-bold">Reset</Text>
+              <Text className="font-bold">Đặt lại</Text>
             </Button>
           </View>
         </View>

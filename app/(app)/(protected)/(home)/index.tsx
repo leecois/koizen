@@ -31,19 +31,9 @@ export default function MyKoiScreen() {
 
   const fetchKoiList = async () => {
     setIsLoading(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('No user logged in');
-      setIsLoading(false);
-      setIsRefreshing(false);
-      return;
-    }
     const { data, error } = await supabase
       .from('koi_fish')
       .select('*')
-      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {

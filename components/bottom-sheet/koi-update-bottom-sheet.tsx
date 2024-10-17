@@ -9,7 +9,6 @@ import BottomSheet from './bottom-sheet';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Divider, Input } from '@rneui/themed';
 import { useSupabase } from '@/context/supabase-provider';
-import { Muted } from '../ui/typography';
 
 type KoiData = {
   id: string;

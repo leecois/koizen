@@ -47,8 +47,14 @@ const KoiCreationBottomSheet: React.FC<KoiCreationBottomSheetProps> = ({
 }) => {
   const { user } = useSupabase();
 
+  useEffect(() => {
+    if (user) {
+      setIsUserLoaded(true);
+    }
+  }, [user]);
+
   const initialKoiData: KoiData = {
-    user_id: user?.id ?? '',
+    user_id: '',
     name: '',
     physique: 'Standard',
     age: 0,
@@ -69,6 +75,17 @@ const KoiCreationBottomSheet: React.FC<KoiCreationBottomSheetProps> = ({
   const [koiData, setKoiData] = useState<KoiData>(initialKoiData);
   const [ponds, setPonds] = useState<Pond[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setIsUserLoaded(true);
+      setKoiData(prevData => ({
+        ...prevData,
+        user_id: user.id,
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchPonds();
@@ -92,9 +109,8 @@ const KoiCreationBottomSheet: React.FC<KoiCreationBottomSheetProps> = ({
   const handleInputChange = (key: keyof KoiData, value: string | number | Date | null) => {
     setKoiData(prev => ({ ...prev, [key]: value }));
 
-    // Tính toán trọng lượng dựa trên chiều dài (kích thước)
     if (key === 'size') {
-      const weight = (value as number) / 4; // 4 chiều dài = 1 trọng lượng
+      const weight = (value as number) / 4;
       setKoiData(prev => ({ ...prev, weight }));
     }
   };
@@ -147,6 +163,7 @@ const KoiCreationBottomSheet: React.FC<KoiCreationBottomSheetProps> = ({
     }
 
     const dataToSubmit = { ...koiData, pond_id: koiData.pond_id ?? null };
+    console.log('data', koiData);
 
     const { data, error } = await supabase.from('koi_fish').insert(dataToSubmit).select();
 
@@ -162,6 +179,10 @@ const KoiCreationBottomSheet: React.FC<KoiCreationBottomSheetProps> = ({
   const resetForm = () => {
     setKoiData(initialKoiData);
   };
+
+  if (!isUserLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
   return (
     <BottomSheet isOpen={isOpen} onClose={onClose}>

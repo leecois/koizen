@@ -1,6 +1,31 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+          extensions?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       blog_posts: {
@@ -45,6 +70,7 @@ export type Database = {
           fish_id: string | null;
           food_type: string | null;
           id: string;
+          notes: string | null;
         };
         Insert: {
           amount?: number | null;
@@ -52,6 +78,7 @@ export type Database = {
           fish_id?: string | null;
           food_type?: string | null;
           id?: string;
+          notes?: string | null;
         };
         Update: {
           amount?: number | null;
@@ -59,6 +86,7 @@ export type Database = {
           fish_id?: string | null;
           food_type?: string | null;
           id?: string;
+          notes?: string | null;
         };
         Relationships: [
           {
@@ -75,6 +103,7 @@ export type Database = {
           date: string | null;
           fish_id: string | null;
           id: string;
+          image_url: string | null;
           notes: string | null;
           size: number | null;
           weight: number | null;
@@ -83,6 +112,7 @@ export type Database = {
           date?: string | null;
           fish_id?: string | null;
           id?: string;
+          image_url?: string | null;
           notes?: string | null;
           size?: number | null;
           weight?: number | null;
@@ -91,6 +121,7 @@ export type Database = {
           date?: string | null;
           fish_id?: string | null;
           id?: string;
+          image_url?: string | null;
           notes?: string | null;
           size?: number | null;
           weight?: number | null;
@@ -108,50 +139,68 @@ export type Database = {
       koi_fish: {
         Row: {
           age: number | null;
-          body_shape: string | null;
-          breed: string | null;
+          breeder: string | null;
           created_at: string | null;
-          gender: string | null;
           id: string;
           image_url: string | null;
-          name: string | null;
+          inpond_since: string | null;
+          name: string;
+          notes: string | null;
           origin: string | null;
+          physique: string | null;
           pond_id: string | null;
-          price: number | null;
+          purchase_date: string | null;
+          purchase_price: number | null;
+          sex: string | null;
           size: number | null;
+          status: string | null;
+          updated_at: string | null;
           user_id: string | null;
+          variety: string | null;
           weight: number | null;
         };
         Insert: {
           age?: number | null;
-          body_shape?: string | null;
-          breed?: string | null;
+          breeder?: string | null;
           created_at?: string | null;
-          gender?: string | null;
           id?: string;
           image_url?: string | null;
-          name?: string | null;
+          inpond_since?: string | null;
+          name: string;
+          notes?: string | null;
           origin?: string | null;
+          physique?: string | null;
           pond_id?: string | null;
-          price?: number | null;
+          purchase_date?: string | null;
+          purchase_price?: number | null;
+          sex?: string | null;
           size?: number | null;
+          status?: string | null;
+          updated_at?: string | null;
           user_id?: string | null;
+          variety?: string | null;
           weight?: number | null;
         };
         Update: {
           age?: number | null;
-          body_shape?: string | null;
-          breed?: string | null;
+          breeder?: string | null;
           created_at?: string | null;
-          gender?: string | null;
           id?: string;
           image_url?: string | null;
-          name?: string | null;
+          inpond_since?: string | null;
+          name?: string;
+          notes?: string | null;
           origin?: string | null;
+          physique?: string | null;
           pond_id?: string | null;
-          price?: number | null;
+          purchase_date?: string | null;
+          purchase_price?: number | null;
+          sex?: string | null;
           size?: number | null;
+          status?: string | null;
+          updated_at?: string | null;
           user_id?: string | null;
+          variety?: string | null;
           weight?: number | null;
         };
         Relationships: [
@@ -160,13 +209,6 @@ export type Database = {
             columns: ['pond_id'];
             isOneToOne: false;
             referencedRelation: 'ponds';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'koi_fish_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
             referencedColumns: ['id'];
           },
         ];
@@ -247,6 +289,7 @@ export type Database = {
           created_at: string | null;
           depth: number | null;
           drain_count: number | null;
+          fish_count: number | null;
           id: string;
           image_url: string | null;
           name: string;
@@ -259,6 +302,7 @@ export type Database = {
           created_at?: string | null;
           depth?: number | null;
           drain_count?: number | null;
+          fish_count?: number | null;
           id?: string;
           image_url?: string | null;
           name: string;
@@ -271,6 +315,7 @@ export type Database = {
           created_at?: string | null;
           depth?: number | null;
           drain_count?: number | null;
+          fish_count?: number | null;
           id?: string;
           image_url?: string | null;
           name?: string;
@@ -338,52 +383,68 @@ export type Database = {
           updated_at?: string | null;
           username?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: 'users_id_fkey';
-            columns: ['id'];
-            isOneToOne: true;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
+        Relationships: [];
       };
       water_parameters: {
         Row: {
+          ammonium_nh4: number | null;
+          amount_fed: number | null;
+          co2: number | null;
+          date_time: string | null;
+          hardness: number | null;
           id: string;
-          measured_at: string | null;
-          nitrate: number | null;
-          nitrite: number | null;
-          oxygen: number | null;
-          ph: number | null;
-          phosphate: number | null;
+          kh: number | null;
+          nitrate_no3: number | null;
+          nitrite_no2: number | null;
+          note: string | null;
+          outdoor_temp: number | null;
+          oxygen_o2: number | null;
+          ph_value: number | null;
+          phosphate_po4: number | null;
           pond_id: string | null;
-          salinity: number | null;
+          salt: number | null;
           temperature: number | null;
+          total_chlorines: number | null;
         };
         Insert: {
+          ammonium_nh4?: number | null;
+          amount_fed?: number | null;
+          co2?: number | null;
+          date_time?: string | null;
+          hardness?: number | null;
           id?: string;
-          measured_at?: string | null;
-          nitrate?: number | null;
-          nitrite?: number | null;
-          oxygen?: number | null;
-          ph?: number | null;
-          phosphate?: number | null;
+          kh?: number | null;
+          nitrate_no3?: number | null;
+          nitrite_no2?: number | null;
+          note?: string | null;
+          outdoor_temp?: number | null;
+          oxygen_o2?: number | null;
+          ph_value?: number | null;
+          phosphate_po4?: number | null;
           pond_id?: string | null;
-          salinity?: number | null;
+          salt?: number | null;
           temperature?: number | null;
+          total_chlorines?: number | null;
         };
         Update: {
+          ammonium_nh4?: number | null;
+          amount_fed?: number | null;
+          co2?: number | null;
+          date_time?: string | null;
+          hardness?: number | null;
           id?: string;
-          measured_at?: string | null;
-          nitrate?: number | null;
-          nitrite?: number | null;
-          oxygen?: number | null;
-          ph?: number | null;
-          phosphate?: number | null;
+          kh?: number | null;
+          nitrate_no3?: number | null;
+          nitrite_no2?: number | null;
+          note?: string | null;
+          outdoor_temp?: number | null;
+          oxygen_o2?: number | null;
+          ph_value?: number | null;
+          phosphate_po4?: number | null;
           pond_id?: string | null;
-          salinity?: number | null;
+          salt?: number | null;
           temperature?: number | null;
+          total_chlorines?: number | null;
         };
         Relationships: [
           {
@@ -483,4 +544,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
     ? PublicSchema['Enums'][PublicEnumNameOrOptions]
+    : never;
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema['CompositeTypes']
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database;
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes']
+    ? PublicSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
     : never;

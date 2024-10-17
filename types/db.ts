@@ -1,3 +1,5 @@
-import { Database } from './supabase';
+import { Tables } from './supabase';
 
-export type KoiFish = Database['public']['Tables']['koi_fish']['Row'];
+export type KoiFish = Tables<'koi_fish'>;
+
+export type Ponds = Tables<'ponds'>;

@@ -1,87 +1,95 @@
-import React, { useState } from 'react';
-import { View, Image, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Image, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { supabase } from '@/config/supabase';
 import { Text } from '@/components/ui/text';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Ionicons } from '@expo/vector-icons';
-import PondCreationBottomSheet from '@/components/bottom-sheet/pond-creation-bottom-sheet';
+import PondCreationUpdateBottomSheet, {
+  PondData,
+} from '@/components/bottom-sheet/pond-creation-update-bottom-sheet';
 import { SpeedDial } from '@rneui/themed';
-
-// Define the Pond type based on your database schema
-type Pond = {
-  id: string;
-  user_id: string;
-  name: string;
-  image_url: string;
-  size: number;
-  depth: number;
-  volume: number;
-  drain_count: number;
-  pump_capacity: number;
-  created_at: string;
-};
-
-const mockPonds: Pond[] = [
-  {
-    id: '1',
-    user_id: 'user1',
-    name: 'Serene Lake',
-    image_url: 'https://placehold.co/600x400.png',
-    size: 100,
-    depth: 2.5,
-    volume: 250,
-    drain_count: 2,
-    pump_capacity: 1000,
-    created_at: '2024-03-15T12:00:00Z',
-  },
-  {
-    id: '2',
-    user_id: 'user1',
-    name: 'Koi Paradise',
-    image_url: 'https://placehold.co/600x400.png',
-    size: 150,
-    depth: 3,
-    volume: 450,
-    drain_count: 3,
-    pump_capacity: 1500,
-    created_at: '2024-03-20T10:00:00Z',
-  },
-];
 
 export default function PondScreen() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isSpeedDialOpen, setIsSpeedDialOpen] = useState(false);
+  const [ponds, setPonds] = useState<PondData[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedPond, setSelectedPond] = useState<PondData | null>(null);
 
-  const handlePondCreated = () => {
-    // Implement the logic for when a new pond is created
+  const fetchPonds = async () => {
+    const { data, error } = await supabase
+      .from('ponds')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Lỗi khi lấy dữ liệu ao:', error);
+    } else {
+      setPonds(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchPonds();
+  }, []);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchPonds().then(() => setRefreshing(false));
+  }, []);
+
+  const handlePondCreatedOrUpdated = () => {
     setIsBottomSheetOpen(false);
-    // You might want to refresh the list of ponds here
+    fetchPonds();
+  };
+
+  const handlePondPress = (pond: PondData) => {
+    setSelectedPond(pond);
+    setIsBottomSheetOpen(true);
   };
 
   return (
     <View className="flex-1 bg-gray-100">
-      <ScrollView className="p-4">
-        {mockPonds.map(pond => (
-          <Card key={pond.id} className="w-full mb-4">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold">{pond.name}</CardTitle>
-              <CardTitle className="text-sm font-medium">Number of fish: 1</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Image source={{ uri: pond.image_url }} className="w-full h-48 rounded-md mb-4" />
-              <View className="space-y-2">
-                <InfoRow icon="resize" label="Size" value={`${pond.size} m²`} />
-                <InfoRow icon="arrow-down" label="Depth" value={`${pond.depth} m`} />
-                <InfoRow icon="water" label="Volume" value={`${pond.volume} m³`} />
-                <InfoRow icon="pulse" label="Drain Count" value={pond.drain_count.toString()} />
-                <InfoRow icon="repeat" label="Pump Capacity" value={`${pond.pump_capacity} L/h`} />
-                <InfoRow
-                  icon="calendar"
-                  label="Created At"
-                  value={new Date(pond.created_at).toLocaleDateString()}
+      <ScrollView
+        className="p-4"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+        {ponds.map(pond => (
+          <TouchableOpacity key={pond.id} onPress={() => handlePondPress(pond)}>
+            <Card className="w-full mb-4">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold">{pond.name}</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Fish count: {pond.fish_count ?? 0}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Image
+                  source={{ uri: pond.image_url || '' }}
+                  className="w-full h-48 rounded-md mb-4"
                 />
-              </View>
-            </CardContent>
-          </Card>
+                <View className="space-y-2">
+                  <InfoRow icon="resize" label="Kích thước" value={`${pond.size} m²`} />
+                  <InfoRow icon="arrow-down" label="Độ sâu" value={`${pond.depth} m`} />
+                  <InfoRow icon="water" label="Thể tích" value={`${pond.volume} m³`} />
+                  <InfoRow
+                    icon="pulse"
+                    label="Số lượng cống"
+                    value={pond.drain_count?.toString() || '0'}
+                  />
+                  <InfoRow
+                    icon="repeat"
+                    label="Công suất bơm"
+                    value={`${pond.pump_capacity} L/h`}
+                  />
+                  <InfoRow
+                    icon="calendar"
+                    label="Ngày tạo"
+                    value={pond.created_at ? new Date(pond.created_at).toLocaleDateString() : 'N/A'}
+                  />
+                </View>
+              </CardContent>
+            </Card>
+          </TouchableOpacity>
         ))}
       </ScrollView>
       <SpeedDial
@@ -95,7 +103,7 @@ export default function PondScreen() {
           <SpeedDial.Action
             key="add-pond"
             icon={{ name: 'add', color: '#fff' }}
-            title="Add New Pond"
+            title="Thêm ao mới"
             onPress={() => {
               setIsSpeedDialOpen(false);
               setIsBottomSheetOpen(true);
@@ -103,10 +111,14 @@ export default function PondScreen() {
           />,
         ]}
       </SpeedDial>
-      <PondCreationBottomSheet
+      <PondCreationUpdateBottomSheet
         isOpen={isBottomSheetOpen}
-        onClose={() => setIsBottomSheetOpen(false)}
-        onPondCreated={handlePondCreated}
+        onClose={() => {
+          setIsBottomSheetOpen(false);
+          setSelectedPond(null);
+        }}
+        onPondCreatedOrUpdated={handlePondCreatedOrUpdated}
+        pondToUpdate={selectedPond}
       />
     </View>
   );
