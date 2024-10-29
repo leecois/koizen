@@ -17,12 +17,11 @@ export default function RecommendationScreen() {
 
   const fetchCategories = async () => {
     try {
-      // Fix for distinct query
       const { data, error } = await supabase
         .from('products')
         .select('category')
-        .not('category', 'is', null) // Filter out null categories
-        .order('category'); // Order categories alphabetically
+        .not('category', 'is', null)
+        .order('category');
 
       if (error) throw error;
 
@@ -31,7 +30,7 @@ export default function RecommendationScreen() {
 
       setCategories(uniqueCategories);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('Lỗi khi lấy danh mục:', error);
     }
   };
 
@@ -51,7 +50,7 @@ export default function RecommendationScreen() {
       if (error) throw error;
       setProducts(data || []);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Lỗi khi lấy sản phẩm:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -75,7 +74,7 @@ export default function RecommendationScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text>Loading products...</Text>
+        <Text>Đang tải sản phẩm...</Text>
       </View>
     );
   }
@@ -84,7 +83,7 @@ export default function RecommendationScreen() {
     <ProductCard
       item={item}
       onPress={product => {
-        console.log('Product pressed:', product.id);
+        console.log('Sản phẩm được nhấn:', product.id);
       }}
     />
   );
@@ -93,7 +92,7 @@ export default function RecommendationScreen() {
     <View className="flex-1 items-start">
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="p-2">
         <Chip
-          title="All"
+          title="Tất cả"
           type={selectedCategory === null ? 'solid' : 'outline'}
           onPress={() => setSelectedCategory(null)}
           containerStyle={{ marginRight: 8 }}

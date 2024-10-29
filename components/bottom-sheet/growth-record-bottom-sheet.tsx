@@ -106,7 +106,7 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
 
   const handleSubmit = async () => {
     if (!recordData.size || !recordData.weight) {
-      Alert.alert('Validation Error', 'Please fill out all required fields.');
+      Alert.alert('Lỗi xác thực', 'Vui lòng điền đầy đủ các trường bắt buộc.');
       return;
     }
 
@@ -125,8 +125,8 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
     const { error } = response;
 
     if (error) {
-      console.error('Error saving growth record:', error);
-      Alert.alert('Error', 'There was an error saving the growth record.');
+      console.error('Lỗi lưu hồ sơ tăng trưởng:', error);
+      Alert.alert('Lỗi', 'Có lỗi xảy ra khi lưu hồ sơ tăng trưởng.');
     } else {
       onRecordSaved();
       onClose();
@@ -151,7 +151,7 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={{ padding: 16 }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' }}>
-            {record ? 'Update Growth Record' : 'Add Growth Record'}
+            {record ? 'Cập nhật hồ sơ tăng trưởng' : 'Thêm hồ sơ tăng trưởng'}
           </Text>
 
           <TouchableOpacity
@@ -178,7 +178,7 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
                 ) : (
                   <View style={{ alignItems: 'center' }}>
                     <FontAwesome5 name="camera" size={40} color="#888" />
-                    <Text style={{ marginTop: 8, color: '#888' }}>Tap to select image</Text>
+                    <Text style={{ marginTop: 8, color: '#888' }}>Nhấn để chọn ảnh</Text>
                   </View>
                 )}
               </View>
@@ -186,7 +186,7 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
           </TouchableOpacity>
 
           <View className="mb-4">
-            <Text>Date and Time</Text>
+            <Text>Ngày và giờ</Text>
             <TouchableOpacity
               className="flex-row items-center justify-between p-3 border border-gray-300 rounded-lg"
               onPress={showDatePicker}>
@@ -206,8 +206,8 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
             <View style={{ width: '48%' }}>
               <Input
-                placeholder="Size (cm)"
-                label="Size (cm)"
+                placeholder="Kích thước (cm)"
+                label="Kích thước (cm)"
                 value={recordData.size.toString()}
                 onChangeText={value => handleInputChange('size', parseFloat(value) || 0)}
                 keyboardType="numeric"
@@ -216,8 +216,8 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
             </View>
             <View style={{ width: '48%' }}>
               <Input
-                placeholder="Weight (kg)"
-                label="Weight (kg)"
+                placeholder="Trọng lượng (kg)"
+                label="Trọng lượng (kg)"
                 value={recordData.weight.toString()}
                 onChangeText={value => handleInputChange('weight', parseFloat(value) || 0)}
                 keyboardType="numeric"
@@ -226,8 +226,8 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
             </View>
           </View>
           <Input
-            placeholder="Notes"
-            label="Notes"
+            placeholder="Ghi chú"
+            label="Ghi chú"
             value={recordData.notes}
             onChangeText={value => handleInputChange('notes', value)}
             leftIcon={<FontAwesome5 name="sticky-note" size={18} color="#FF4500" />}
@@ -236,11 +236,11 @@ const GrowthRecordBottomSheet: React.FC<GrowthRecordBottomSheetProps> = ({
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
             <Button onPress={handleSubmit} disabled={uploading} style={{ flex: 1, marginRight: 8 }}>
               <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                {record ? 'Update' : 'Add'}
+                {record ? 'Cập nhật' : 'Thêm'}
               </Text>
             </Button>
             <Button onPress={onClose} variant="outline" style={{ flex: 1, marginLeft: 8 }}>
-              <Text style={{ fontWeight: 'bold' }}>Cancel</Text>
+              <Text style={{ fontWeight: 'bold' }}>Hủy</Text>
             </Button>
           </View>
         </View>

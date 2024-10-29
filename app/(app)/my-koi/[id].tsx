@@ -223,7 +223,7 @@ const KoiDetailScreen = () => {
           <H1 style={styles.name}>{koi.name}</H1>
           {pond && <Text style={styles.pondName}>Hồ cá hiện tại: {pond.name}</Text>}
           <Card containerStyle={styles.card}>
-            <H2 style={styles.sectionTitle}>Basic Information</H2>
+            <H2 style={styles.sectionTitle}>Thông tin cơ bản</H2>
             <View style={styles.infoRow}>
               <InfoItem icon="fish" label="Giống" value={koi.variety} />
               <InfoItem icon="dumbbell" label="Thể trạng" value={koi.physique} />

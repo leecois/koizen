@@ -62,7 +62,7 @@ const FeedingRecordBottomSheet: React.FC<FeedingRecordBottomSheetProps> = ({
   const handleSubmit = async () => {
     // Kiểm tra các trường cần thiết
     if (!recordData.amount || !recordData.food_type || !fishId) {
-      Alert.alert('Validation Error', 'Please fill out all required fields.');
+      Alert.alert('Lỗi xác thực', 'Vui lòng điền đầy đủ các trường bắt buộc.');
       return;
     }
 
@@ -81,8 +81,8 @@ const FeedingRecordBottomSheet: React.FC<FeedingRecordBottomSheetProps> = ({
     const { error } = response;
 
     if (error) {
-      console.error('Error saving feeding record:', error);
-      Alert.alert('Error', 'There was an error saving the feeding record.');
+      console.error('Lỗi lưu hồ sơ cho ăn:', error);
+      Alert.alert('Lỗi', 'Có lỗi xảy ra khi lưu hồ sơ cho ăn.');
     } else {
       onRecordSaved();
       onClose();
@@ -107,11 +107,11 @@ const FeedingRecordBottomSheet: React.FC<FeedingRecordBottomSheetProps> = ({
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={{ padding: 16 }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' }}>
-            {record ? 'Update Feeding Record' : 'Add Feeding Record'}
+            {record ? 'Cập nhật hồ sơ cho ăn' : 'Thêm hồ sơ cho ăn'}
           </Text>
 
           <View className="mb-4">
-            <Text>Date and Time</Text>
+            <Text>Ngày và giờ</Text>
             <TouchableOpacity
               className="flex-row items-center justify-between p-3 border border-gray-300 rounded-lg"
               onPress={showDatePicker}>
@@ -131,8 +131,8 @@ const FeedingRecordBottomSheet: React.FC<FeedingRecordBottomSheetProps> = ({
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
             <View style={{ width: '48%' }}>
               <Input
-                placeholder="Amount (g)"
-                label="Amount (g)"
+                placeholder="Số lượng (g)"
+                label="Số lượng (g)"
                 value={recordData.amount.toString()}
                 onChangeText={value => handleInputChange('amount', parseFloat(value) || 0)}
                 keyboardType="numeric"
@@ -141,8 +141,8 @@ const FeedingRecordBottomSheet: React.FC<FeedingRecordBottomSheetProps> = ({
             </View>
             <View style={{ width: '48%' }}>
               <Input
-                placeholder="Food Type"
-                label="Food Type"
+                placeholder="Loại thức ăn"
+                label="Loại thức ăn"
                 value={recordData.food_type}
                 onChangeText={value => handleInputChange('food_type', value)}
                 leftIcon={<FontAwesome5 name="utensils" size={18} color="#32CD32" />}
@@ -150,8 +150,8 @@ const FeedingRecordBottomSheet: React.FC<FeedingRecordBottomSheetProps> = ({
             </View>
           </View>
           <Input
-            placeholder="Notes"
-            label="Notes"
+            placeholder="Ghi chú"
+            label="Ghi chú"
             value={recordData.notes}
             onChangeText={value => handleInputChange('notes', value)}
             leftIcon={<FontAwesome5 name="sticky-note" size={18} color="#FF4500" />}
@@ -160,11 +160,11 @@ const FeedingRecordBottomSheet: React.FC<FeedingRecordBottomSheetProps> = ({
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
             <Button onPress={handleSubmit} style={{ flex: 1, marginRight: 8 }}>
               <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                {record ? 'Update' : 'Add'}
+                {record ? 'Cập nhật' : 'Thêm'}
               </Text>
             </Button>
             <Button onPress={onClose} variant="outline" style={{ flex: 1, marginLeft: 8 }}>
-              <Text style={{ fontWeight: 'bold' }}>Cancel</Text>
+              <Text style={{ fontWeight: 'bold' }}>Hủy</Text>
             </Button>
           </View>
         </View>
