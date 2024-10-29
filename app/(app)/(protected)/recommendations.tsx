@@ -43,7 +43,7 @@ export default function RecommendationScreen() {
       }
 
       // Add order and limit
-      query = query.order('created_at', { ascending: false }).limit(10);
+      query = query.order('created_at', { ascending: false }).limit(50);
 
       const { data, error } = await query;
 
@@ -113,8 +113,8 @@ export default function RecommendationScreen() {
         renderItem={renderItem}
         keyExtractor={item => item.id.toString()}
         numColumns={2}
-        contentContainerStyle={{ padding: SPACING / 2 }}
-        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        contentContainerStyle={{ padding: SPACING / 2, flex: 1 }}
+        columnWrapperStyle={{ justifyContent: 'space-between', alignItems: 'flex-start' }}
         showsVerticalScrollIndicator={false}
         refreshing={refreshing}
         onRefresh={onRefresh}
