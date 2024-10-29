@@ -59,8 +59,7 @@ export default function ProtectedLayout() {
       <Tabs.Screen
         name="recommendations"
         options={{
-          headerShown: false,
-          title: 'Recommendations',
+          title: 'Đề xuất cho bạn',
           tabBarIcon({ color, size }) {
             return <Ionicons name="star-outline" color={color} size={size} />;
           },
@@ -69,7 +68,7 @@ export default function ProtectedLayout() {
       <Tabs.Screen
         name="news"
         options={{
-          title: 'News',
+          title: 'Thống kê',
           tabBarIcon({ color, size }) {
             return <Ionicons name="newspaper-outline" color={color} size={size} />;
           },

@@ -148,8 +148,6 @@ const MeasurementCreation = ({
       return acc;
     }, {} as any);
 
-    console.log('Tạo thông số nước:', numericWaterData);
-    // Uncomment the following lines when ready to submit to Supabase
     const { data, error } = await supabase
       .from('water_parameters')
       .insert(numericWaterData)

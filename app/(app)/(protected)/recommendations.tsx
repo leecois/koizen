@@ -1,26 +1,128 @@
-import { View } from 'react-native';
+import { FlatList, ScrollView, View } from 'react-native';
 
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { H1, Muted } from '@/components/ui/typography';
-import { useSupabase } from '@/context/supabase-provider';
+import { ProductCard } from '@/components/card/product-card';
+import React from 'react';
+import { supabase } from '@/config/supabase';
+import { Product } from '@/types/db';
+import { Chip } from '@rneui/themed';
 
+const SPACING = 8;
 export default function RecommendationScreen() {
-  const { signOut } = useSupabase();
+  const [products, setProducts] = React.useState<Product[]>([]);
+  const [categories, setCategories] = React.useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const fetchCategories = async () => {
+    try {
+      // Fix for distinct query
+      const { data, error } = await supabase
+        .from('products')
+        .select('category')
+        .not('category', 'is', null) // Filter out null categories
+        .order('category'); // Order categories alphabetically
+
+      if (error) throw error;
+
+      // Remove duplicates and null values
+      const uniqueCategories = Array.from(new Set(data.map(item => item.category).filter(Boolean)));
+
+      setCategories(uniqueCategories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchProducts = async (category?: string) => {
+    try {
+      let query = supabase.from('products').select('*');
+
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      // Add order and limit
+      query = query.order('created_at', { ascending: false }).limit(10);
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    fetchProducts(selectedCategory ?? undefined);
+  }, [selectedCategory]);
+
+  React.useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, []);
+
+  React.useEffect(() => {
+    fetchProducts(selectedCategory ?? undefined);
+  }, [selectedCategory]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text>Loading products...</Text>
+      </View>
+    );
+  }
+
+  const renderItem = ({ item }: { item: Product }) => (
+    <ProductCard
+      item={item}
+      onPress={product => {
+        console.log('Product pressed:', product.id);
+      }}
+    />
+  );
 
   return (
-    <View className="flex-1 items-center justify-center p-4 gap-y-4">
-      <H1 className="text-center">Sign Out</H1>
-      <Muted className="text-center">Sign out and return to the welcome screen.</Muted>
-      <Button
-        className="w-full"
-        size="default"
-        variant="default"
-        onPress={() => {
-          signOut();
-        }}>
-        <Text>Sign Out</Text>
-      </Button>
+    <View className="flex-1 items-start">
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="p-2">
+        <Chip
+          title="All"
+          type={selectedCategory === null ? 'solid' : 'outline'}
+          onPress={() => setSelectedCategory(null)}
+          containerStyle={{ marginRight: 8 }}
+        />
+        {categories.map(category => (
+          <Chip
+            key={category}
+            title={category}
+            type={selectedCategory === category ? 'solid' : 'outline'}
+            onPress={() => setSelectedCategory(category)}
+            containerStyle={{ marginRight: 8 }}
+          />
+        ))}
+      </ScrollView>
+
+      <FlatList
+        data={products}
+        renderItem={renderItem}
+        keyExtractor={item => item.id.toString()}
+        numColumns={2}
+        contentContainerStyle={{ padding: SPACING / 2 }}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        showsVerticalScrollIndicator={false}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={5}
+      />
     </View>
   );
 }

@@ -55,6 +55,7 @@ const PondCreationUpdateBottomSheet = ({
   const [pondData, setPondData] = useState<PondData>(initialPondData);
   const [uploading, setUploading] = useState(false);
   const [isUserLoaded, setIsUserLoaded] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -125,6 +126,42 @@ const PondCreationUpdateBottomSheet = ({
     }
   };
 
+  const handleDelete = () => {
+    Alert.alert(
+      'Xác nhận xóa',
+      'Bạn có chắc chắn muốn xóa ao này không? Hành động này sẽ xóa tất cả thông số và không thể hoàn tác.',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Xóa', style: 'destructive', onPress: confirmDelete },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const confirmDelete = async () => {
+    if (!pondToUpdate?.id) return;
+
+    try {
+      setIsDeleting(true);
+
+      // Delete associated water parameters first
+      await supabase.from('water_parameters').delete().eq('pond_id', pondToUpdate.id);
+
+      // Delete the pond
+      const { error } = await supabase.from('ponds').delete().eq('id', pondToUpdate.id);
+
+      if (error) throw error;
+
+      onPondCreatedOrUpdated();
+      onClose();
+    } catch (error) {
+      console.error('Error deleting pond:', error);
+      Alert.alert('Lỗi', 'Không thể xóa ao khi cá vẫn còn trong ao. Vui lòng thử lại sau.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (
       !pondData.name ||
@@ -181,7 +218,7 @@ const PondCreationUpdateBottomSheet = ({
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={{ padding: 16 }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, textAlign: 'center' }}>
-            {pondToUpdate ? 'Update Pond' : 'Add New Pond'}
+            {pondToUpdate ? 'Cập nhật ao' : 'Thêm ao mới'}
           </Text>
 
           <TouchableOpacity
@@ -208,7 +245,7 @@ const PondCreationUpdateBottomSheet = ({
                 ) : (
                   <View style={{ alignItems: 'center' }}>
                     <FontAwesome name="camera" size={40} color="#888" />
-                    <Text style={{ marginTop: 8, color: '#888' }}>Tap to select image</Text>
+                    <Text style={{ marginTop: 8, color: '#888' }}>Chọn ảnh</Text>
                   </View>
                 )}
               </View>
@@ -216,8 +253,8 @@ const PondCreationUpdateBottomSheet = ({
           </TouchableOpacity>
 
           <Input
-            placeholder="Name"
-            label="Name"
+            placeholder="Tên ao"
+            label="Tên"
             value={pondData.name}
             onChangeText={value => handleInputChange('name', value)}
             leftIcon={<FontAwesome name="files-o" size={24} color="#888" />}
@@ -227,8 +264,8 @@ const PondCreationUpdateBottomSheet = ({
           <View className="flex-row justify-between mb-4">
             <View className="w-[48%]">
               <Input
-                placeholder="Size (m²)"
-                label="Size (m²)"
+                placeholder="Diện tích (m²)"
+                label="Diện tích (m²)"
                 value={pondData.size.toString()}
                 onChangeText={value => handleInputChange('size', parseFloat(value) || 0)}
                 keyboardType="numeric"
@@ -237,8 +274,8 @@ const PondCreationUpdateBottomSheet = ({
             </View>
             <View className="w-[48%]">
               <Input
-                placeholder="Depth (m)"
-                label="Depth (m)"
+                placeholder="Độ sâu (m)"
+                label="Độ sâu (m)"
                 value={pondData.depth.toString()}
                 onChangeText={value => handleInputChange('depth', parseFloat(value) || 0)}
                 keyboardType="numeric"
@@ -249,8 +286,8 @@ const PondCreationUpdateBottomSheet = ({
           <View className="flex-row justify-between mb-4">
             <View className="w-[48%]">
               <Input
-                placeholder="Volume (m³)"
-                label="Volume (m³)"
+                placeholder="Thể tích (m³)"
+                label="Thể tích (m³)"
                 value={pondData.volume.toString()}
                 onChangeText={value => handleInputChange('volume', parseFloat(value) || 0)}
                 keyboardType="numeric"
@@ -259,8 +296,8 @@ const PondCreationUpdateBottomSheet = ({
             </View>
             <View className="w-[48%]">
               <Input
-                placeholder="Drain Count"
-                label="Drain Count"
+                placeholder="Số cống"
+                label="Số cống"
                 value={pondData.drain_count.toString()}
                 onChangeText={value => handleInputChange('drain_count', parseInt(value) || 0)}
                 keyboardType="numeric"
@@ -269,8 +306,8 @@ const PondCreationUpdateBottomSheet = ({
             </View>
           </View>
           <Input
-            placeholder="Pump Capacity (l/h)"
-            label="Pump Capacity (l/h)"
+            placeholder="Công suất bơm (l/h)"
+            label="Công suất bơm (l/h)"
             value={pondData.pump_capacity.toString()}
             onChangeText={value => handleInputChange('pump_capacity', parseFloat(value) || 0)}
             keyboardType="numeric"
@@ -278,15 +315,33 @@ const PondCreationUpdateBottomSheet = ({
           />
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
-            <Button onPress={handleSubmit} disabled={uploading} style={{ flex: 1, marginRight: 8 }}>
+            <Button
+              onPress={handleSubmit}
+              disabled={uploading || isDeleting}
+              style={{ flex: 1, marginRight: 8 }}>
               <Text style={{ color: 'white', fontWeight: 'bold' }}>
-                {pondToUpdate ? 'Update Pond' : 'Create Pond'}
+                {pondToUpdate ? 'Cập nhật' : 'Tạo mới'}
               </Text>
             </Button>
-            <Button onPress={resetForm} variant="outline" style={{ flex: 1, marginLeft: 8 }}>
-              <Text style={{ fontWeight: 'bold' }}>Reset</Text>
+            <Button
+              onPress={resetForm}
+              variant="outline"
+              disabled={isDeleting}
+              style={{ flex: 1, marginLeft: 8 }}>
+              <Text style={{ fontWeight: 'bold' }}>Đặt lại</Text>
             </Button>
           </View>
+
+          {pondToUpdate && (
+            <Button onPress={handleDelete} disabled={isDeleting} className="mt-4 bg-red-500">
+              <View className="flex-row items-center justify-center">
+                <FontAwesome name="trash" size={20} color="white" style={{ marginRight: 8 }} />
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                  {isDeleting ? 'Đang xóa...' : 'Xóa ao'}
+                </Text>
+              </View>
+            </Button>
+          )}
         </View>
       </ScrollView>
     </BottomSheet>
