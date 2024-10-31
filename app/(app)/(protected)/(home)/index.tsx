@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, RefreshControl } from 'react-native';
 import { SpeedDial, Card } from '@rneui/themed';
-import { H1, Muted } from '@/components/ui/typography';
+import { Muted } from '@/components/ui/typography';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { supabase } from '@/config/supabase';
@@ -156,7 +156,10 @@ export default function MyKoiScreen() {
 
   const varietyOptions: ItemType<string>[] = [
     { label: 'Tất cả', value: '' },
-    ...varieties.map(variety => ({ label: variety, value: variety })),
+    ...Array.from(new Set(varieties.filter(variety => variety))).map(variety => ({
+      label: variety,
+      value: variety,
+    })),
   ];
 
   const FilterSection = () => (
